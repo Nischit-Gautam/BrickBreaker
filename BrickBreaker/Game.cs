@@ -59,6 +59,8 @@ namespace BrickBreaker
                 }
             }
         }
+
+
         public  void MovePadel(ConsoleKeyInfo key)
         {
 

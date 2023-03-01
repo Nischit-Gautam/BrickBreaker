@@ -14,6 +14,8 @@ namespace BrickBreaker
         static void Main(string[] args)
         {
             Console.Clear();
+            ReadGameFile readGameFile = new ReadGameFile();
+            var setting = readGameFile.ReadSettingFile();
             Console.SetCursorPosition(0, 0);
             Console.WriteLine("Press Enter to start");
             Console.WriteLine("Press ESC to stop");
@@ -28,7 +30,7 @@ namespace BrickBreaker
                         score = game.Start();
                         Main(new string[] { });
                         break;
-                    default:
+                    case ConsoleKey.Escape:
                         return;
                         
                 }
