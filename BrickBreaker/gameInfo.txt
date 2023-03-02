@@ -1,4 +1,5 @@
 {
 	HighScore:0,
-	PreferredName:""
+	PreferredName:"",
+	RefreshRate:50
 }

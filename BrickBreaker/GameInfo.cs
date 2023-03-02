@@ -8,5 +8,6 @@ namespace BrickBreaker
     {
         public int HighScore { get; set; }
         public string PreferredName { get; set; }
+        public int RefreshRate { get; set; }
     }
 }

@@ -21,5 +21,14 @@ namespace BrickBreaker
             }
             return gameInfo;
         }
+        public void WriteSettingFile(GameInfo gameInfo)
+        {
+            string path = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "\\gameInfo.txt";
+            string settingString = JsonConvert.SerializeObject(gameInfo);
+            using (StreamWriter writer = new StreamWriter(path))
+            {
+                writer.Write(settingString);               
+            }
+        }
     }
 }

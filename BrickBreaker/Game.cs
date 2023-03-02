@@ -7,6 +7,7 @@ namespace BrickBreaker
 {
     internal class Game
     {
+
         public int ballXPosition = 20;
         public int ballYPosition = 23;
         public int width = 40;
@@ -16,21 +17,30 @@ namespace BrickBreaker
         public int padelXPosition = 20;
         public int ballXDirection = 1;
         public int ballYDirection = 1;
+        public static int powerDuration = 10;
         public int padelWidth = 5;
         public bool gameOver = false;
         public int brickColumns = 20;
         public int brickRaws = 4;
+        public static int refreshRate = 0;
         public List<int> paddlePositions = new List<int>();
         public List<Brick> bricks = new List<Brick>();
         public Random random = new Random();
+        public static System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
         public int score = 0;
+        bool isPowerActive = false;
         public int Start()
         {
-            InitializeBricks();
+            ReadGameFile readGameFile = new ReadGameFile();
+            var settings = readGameFile.ReadSettingFile();
+            refreshRate = settings.RefreshRate;
+            //InitializeBricks();
+            CreateRandomBricks();
             while (!gameOver)
             {
                 CheckWallCollision();
                 DrawBricks();
+                DrawRightBorder();
                 CheckBrickCollision();
                 MoveBall();
                 DrawBall();
@@ -41,11 +51,24 @@ namespace BrickBreaker
                 {
                     MovePadel(Console.ReadKey(true));
                 }
-
-                Thread.Sleep(20);
+                var powerActiveTime = stopWatch.Elapsed;
+                if(powerActiveTime>TimeSpan.FromSeconds(powerDuration)) {
+                    padelWidth /= 2;
+                    stopWatch.Stop();
+                    stopWatch.Reset();
+                }
+                Thread.Sleep(refreshRate);
 
             }
             return score;
+        }
+        private void DrawRightBorder()
+        {
+            for (int i = 0; i < height; i++)
+            {
+                Console.SetCursorPosition(width + 1, i);
+                Console.WriteLine("|");
+            }
         }
         private void InitializeBricks()
         {
@@ -59,8 +82,44 @@ namespace BrickBreaker
                 }
             }
         }
-
-
+        private void CreateRandomBricks()
+        {
+            int totalBrickCount = brickColumns * brickRaws;
+           
+            HashSet<int> addedBricks = new HashSet<int> ();
+            for (int i = 0; i <= totalBrickCount; i++)
+            {                
+                    bool gotValue = false;
+                    while (!gotValue)
+                    {
+                        var coordinate = GetCoOrdinates();
+                        string tmp = coordinate.Item1.ToString() + coordinate.Item2.ToString();
+                        if (!addedBricks.TryGetValue(Convert.ToInt32(tmp), out int aa))
+                        {
+                            gotValue = true;
+                            if(i%10==0)
+                            {
+                                bricks.Add(new Brick(coordinate.Item2, coordinate.Item1,true));
+                            }
+                            else
+                            {
+                                bricks.Add(new Brick(coordinate.Item2, coordinate.Item1));
+                            }
+                            
+                            addedBricks.Add(Convert.ToInt32(tmp));
+                        }
+                    }
+                   
+                
+            }
+            
+        }
+        private (int,int) GetCoOrdinates()
+        {
+            var tempHeight = random.Next(height - 20);
+            var tempWeidth = random.Next(width);
+            return (tempHeight,tempWeidth);
+        }
         public  void MovePadel(ConsoleKeyInfo key)
         {
 
@@ -135,6 +194,12 @@ namespace BrickBreaker
                 {
                     brick.isDestroyed = true;
                     score += 10;
+                    if (brick.hasSpecialPower)
+                    {
+                        padelWidth *= 2;
+                        isPowerActive = true;
+                        stopWatch.Start();
+                    }
                     if (ballYDirection == 1)
                     {
                         ballYDirection = -1;
@@ -186,7 +251,14 @@ namespace BrickBreaker
                 if (!brick.isDestroyed)
                 {
                     Console.SetCursorPosition(brick.x, brick.y);
-                    Console.WriteLine("#");
+                    if (brick.hasSpecialPower)
+                    {
+                        Console.WriteLine("@");
+                    }
+                    else
+                    {                        
+                        Console.WriteLine("#");
+                    }
                 }
             }
         }
