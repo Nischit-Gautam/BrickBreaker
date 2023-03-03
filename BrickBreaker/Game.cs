@@ -16,8 +16,7 @@ namespace BrickBreaker
         public double ballSpeed = 0.5;
         public int padelXPosition = 20;
         public int ballXDirection = 1;
-        public int ballYDirection = 1;
-        public static int powerDuration = 10;
+        public int ballYDirection = 1;        
         public int padelWidth = 5;
         public bool gameOver = false;
         public int brickColumns = 20;
@@ -29,6 +28,7 @@ namespace BrickBreaker
         public static System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
         public int score = 0;
         bool isPowerActive = false;
+        public static int powerUpDuration = 0;
         public int Start()
         {
             ReadGameFile readGameFile = new ReadGameFile();
@@ -51,11 +51,16 @@ namespace BrickBreaker
                 {
                     MovePadel(Console.ReadKey(true));
                 }
+                if(isPowerActive == true) {
+                    padelWidth = 10;                
+                }
                 var powerActiveTime = stopWatch.Elapsed;
-                if(powerActiveTime>TimeSpan.FromSeconds(powerDuration)) {
+                if(powerActiveTime>TimeSpan.FromSeconds(powerUpDuration)) {
                     padelWidth /= 2;
                     stopWatch.Stop();
                     stopWatch.Reset();
+                    isPowerActive = false;
+                    powerUpDuration = 0;
                 }
                 Thread.Sleep(refreshRate);
 
@@ -136,7 +141,7 @@ namespace BrickBreaker
 
                 case ConsoleKey.RightArrow:
                     {
-                        if (padelXPosition <= width)
+                        if ((padelXPosition+padelWidth) <= width)
                         {
                             padelXPosition++;
                         }
@@ -196,7 +201,7 @@ namespace BrickBreaker
                     score += 10;
                     if (brick.hasSpecialPower)
                     {
-                        padelWidth *= 2;
+                        powerUpDuration += 10;
                         isPowerActive = true;
                         stopWatch.Start();
                     }
